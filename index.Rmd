@@ -1,0 +1,224 @@
+---
+title       : Rcpp / C++ 線上講座 -- R 和 C++的形態轉換(簡介C++的形態)
+subtitle    : 
+author      : 
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : zenburn      # 
+widgets     : [mathjax, quiz]            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+--- .segue .dark
+
+```{r steup, include=FALSE, cache=FALSE}
+library(knitr)
+opts_chunk$set(echo = FALSE, results='asis')
+opts_chunk$get("echo")
+```
+
+## 原子形態
+
+--- &vcenter .large
+
+```{r type, results='asis', cache=FALSE}
+suppressPackageStartupMessages(library(xtable))
+print.xtable(xtable(read.csv("type.csv")), type="html")
+```
+
+--- &twocol
+
+## 查詢物件的記憶體大小
+
+`sizeof` 可以印出物件需要的記憶體大小(位元組)
+
+*** =left
+
+```{r sizeof, echo = TRUE, engine='Rcpp'}
+#include <Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+void showSize() {
+  Rcout << sizeof(bool) << std::endl;
+  Rcout << sizeof(char) << std::endl;
+  Rcout << sizeof(short) << std::endl;
+  Rcout << sizeof(int) << std::endl;
+  Rcout << sizeof(long) << std::endl;
+  Rcout << sizeof(float) << std::endl;
+  Rcout << sizeof(double) << std::endl;
+}
+```
+
+*** =right
+
+<br/><br/><br/>
+```{r sizeofR, results='markup', dependson='sizeof'}
+showSize()
+```
+
+--- &radio
+
+## 小挑戰
+
+資料出處: [wiki人類基因組](http://zh.wikipedia.org/wiki/%E4%BA%BA%E9%A1%9E%E5%9F%BA%E5%9B%A0%E7%B5%84)
+
+人類基因組含有約30億個DNA鹼基對，鹼基對是以氫鍵相結合的兩個含氮鹼基，以胸腺嘧啶（T）、腺嘌呤（A）、胞嘧啶（C）和鳥嘌呤（G）四種鹼基排列成鹼基序列。
+
+如果我們以一個位元組(`char`)來儲存一個人的基因組，大約需要多大的記憶體？
+
+提示: 1KB約表示1000位元組, 以此類推
+
+1. 約 3KB
+2. 約 3MB
+3. _約 3GB_
+4. 約 3TB
+
+*** =pnotes
+
+30億為$3 \times 10^9$
+
+$3$ GB = $3 \times 2^10$ MB = $3 \times 2^20$ KB = $3 \times 2^30$ 位元組
+
+--- &vcenter .large
+
+面對大量資料
+
+可估計需要的記憶體
+
+--- &twocolvcenter .large
+
+## 指針, 記憶體的住址
+
+*** =left
+
+```{r pointer, engine='Rcpp', echo=TRUE, cache=FALSE}
+#include <Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+void showAddress(SEXP a) {
+  Rprintf("%p\n", a);
+}
+```
+
+*** =right
+
+```{r pointerR, dependson='pointer', echo=TRUE, results='markup', cache=FALSE}
+showAddress(iris)
+```
+
+--- &vcenter 
+
+## 32位元與64位元
+
+```{r pointerR2, dependson='pointer', echo=TRUE, results='markup', cache=FALSE}
+showAddress(iris)
+```
+
+HexCode: 0 ~ F, 兩個字母表示一個位元組
+
+所以可以用$2^6 = 64$個bit表示記憶體的住址。
+
+32位元的電腦僅用$2^5 = 32$個bit表示記憶體的住址，
+
+$2^32個$個位元組約為4GB
+
+--- &radio
+
+## 小挑戰
+
+64位元的電腦，記憶體大概為多少?
+
+1. 小於TB($2^{40}$ 位元組)
+1. 小於PB($2^{50}$ 位元組)
+1. 小於EB($2^{60}$ 位元組)
+1. _小於ZB($2^{70}$ 位元組)_
+
+--- &vcenter .large
+
+取住址的運算子: `&`
+
+取值的運算子: `*`
+
+```{r pointer2, engine='Rcpp', cache=FALSE, echo=TRUE}
+#include <Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+int getInt() {
+  int a = 1;
+  int* pa = &a; // pa 是 a 的住址
+  return (*pa); // 把住在pa的人拿出來
+}
+```
+
+*** =pnotes
+
+```{r pointer2R, dependson='pointer2'}
+getInt()
+```
+
+--- &twocolvcenter 
+
+## 字串的本質: char*, char[]
+
+*** =left
+
+```{r pointer3, engine='Rcpp', cache=FALSE, echo=TRUE}
+#include <Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+void getChar(CharacterVector src) {
+  const char* ps = CHAR(src[0]);
+  char tmp;
+  for(int i = 0;i < 7;i++) {
+    tmp = ps[i];
+    Rcout << tmp << std::endl;
+  }
+}
+/*** R
+getChar("setosa")
+*/
+```
+
+*** =right
+
+`{'s', 'e', 't', 'o', 's', 'a', 0x00}`
+
+陣列住標運算子:`[`
+
+```{r pointer3R, dependson='pointer3', results='markup', cache=FALSE}
+getChar("setosa")
+```
+
+--- &twocolvcenter 
+
+## 字串的本質: char*, char[]
+
+*** =left
+
+```{r pointer4, engine='Rcpp', cache=FALSE, echo=TRUE}
+#include <Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+void changeChar(CharacterVector src) {
+  char* ps =
+    const_cast<char*>(CHAR(src[0]));
+  ps[0] = 'z';
+}
+/*** R
+a <- "setosa"
+tracemem(a)
+changeChar(a)
+a
+*/
+```
+
+*** =right
+
+```{r pointer4R, dependson='pointer4', results='markup', cache=FALSE}
+a <- "setosa"
+# tracemem(a)
+changeChar(a)
+a
+```
+
+`{'s', 'e', 't', 'o', 's', 'a', 0x00}` $\Rightarrow$ `{'z', 'e', 't', 'o', 's', 'a', 0x00}`

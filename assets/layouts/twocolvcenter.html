@@ -9,4 +9,12 @@
 <div style='float:right;width:48%;' class='flexbox vcenter'>
   {{{ slide.right.html }}}
 </div>
+  <!-- Presenter Notes -->
+  {{# slide.pnotes }}
+  <aside class="note" id="{{ id }}">
+    <section>
+      {{{ html }}}
+    </section>
+  </aside>
+  {{/ slide.pnotes }}
 </slide>

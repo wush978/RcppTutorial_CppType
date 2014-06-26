@@ -1,0 +1,8 @@
+C原子形態,意義,對應的R原子形態,大小(位元組)
+bool,布林,logical(註),NA
+char,字元,character(註),1
+short,短整數,,2
+int,整數,integer,4
+long,長整數,POSIXct(註),8
+float,浮點數,,4
+double,雙精確服點數,double,8

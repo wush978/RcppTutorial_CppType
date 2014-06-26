@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rcpp / C++ 線上講座 -- R 和 C++的形態轉換(簡介C++的形態)</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Rcpp / C++ 線上講座 -- R 和 C++的形態轉換(簡介C++的形態)">
+  <meta name="author" content="">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/zenburn.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="libraries/widgets/quiz/css/demo.css"></link>
+<link rel=stylesheet href="./assets/css/custom.css"></link>
+<link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Rcpp / C++ 線上講座 -- R 和 C++的形態轉換(簡介C++的形態)</h1>
+    <h2></h2>
+    <p><br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="segue dark" id="slide-1" style="background:; background-repeat:no-repeat; background-position:center; ">
+  <img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+  <hgroup>
+    <h2>原子形態</h2>
+  </hgroup>
+  <article data-timings="">
+    
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="large" id="slide-2">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  
+</hgroup>
+<article class = 'flexbox vcenter'>
+<!-- html table generated in R 3.1.0 by xtable 1.7-3 package -->
+
+<!-- Thu Jun 26 20:17:32 2014 -->
+
+<TABLE border=1>
+<TR> <TH>  </TH> <TH> C原子形態 </TH> <TH> 意義 </TH> <TH> 對應的R原子形態 </TH> <TH> 大小.位元組. </TH>  </TR>
+  <TR> <TD align="right"> 1 </TD> <TD> bool </TD> <TD> 布林 </TD> <TD> logical(註) </TD> <TD align="right">  </TD> </TR>
+  <TR> <TD align="right"> 2 </TD> <TD> char </TD> <TD> 字元 </TD> <TD> character(註) </TD> <TD align="right">   1 </TD> </TR>
+  <TR> <TD align="right"> 3 </TD> <TD> short </TD> <TD> 短整數 </TD> <TD>  </TD> <TD align="right">   2 </TD> </TR>
+  <TR> <TD align="right"> 4 </TD> <TD> int </TD> <TD> 整數 </TD> <TD> integer </TD> <TD align="right">   4 </TD> </TR>
+  <TR> <TD align="right"> 5 </TD> <TD> long </TD> <TD> 長整數 </TD> <TD> POSIXct(註) </TD> <TD align="right">   8 </TD> </TR>
+  <TR> <TD align="right"> 6 </TD> <TD> float </TD> <TD> 浮點數 </TD> <TD>  </TD> <TD align="right">   4 </TD> </TR>
+  <TR> <TD align="right"> 7 </TD> <TD> double </TD> <TD> 雙精確服點數 </TD> <TD> double </TD> <TD align="right">   8 </TD> </TR>
+   </TABLE>
+
+</article>
+<!-- Presenter Notes -->
+</slide>
+<slide class="" id="slide-3" style="background:; background-repeat:no-repeat; background-position:center; ">
+  <img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+  <hgroup>
+    <h2>查詢物件的記憶體大小</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><code>sizeof</code> 可以印出物件需要的記憶體大小(位元組)</p>
+
+<div style='float:left;width:48%;'>
+<pre><code class="cpp">#include &lt;Rcpp.h&gt;
+using namespace Rcpp;
+//[[Rcpp::export]]
+void showSize() {
+  Rcout &lt;&lt; sizeof(bool) &lt;&lt; std::endl;
+  Rcout &lt;&lt; sizeof(char) &lt;&lt; std::endl;
+  Rcout &lt;&lt; sizeof(short) &lt;&lt; std::endl;
+  Rcout &lt;&lt; sizeof(int) &lt;&lt; std::endl;
+  Rcout &lt;&lt; sizeof(long) &lt;&lt; std::endl;
+  Rcout &lt;&lt; sizeof(float) &lt;&lt; std::endl;
+  Rcout &lt;&lt; sizeof(double) &lt;&lt; std::endl;
+}
+</code></pre>
+
+</div>
+  <div style='float:right;width:48%;'>
+<p><br/><br/><br/></p>
+
+<pre><code>## 1
+## 1
+## 2
+## 4
+## 8
+## 4
+## 8
+</code></pre>
+
+</div>
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:; background-repeat:no-repeat; background-position:center; ">
+  <img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+  <hgroup>
+    <h2>小挑戰</h2>
+  </hgroup>
+  <article data-timings="">
+    
+<div class="quiz quiz-single well ">
+  <p>資料出處: <a href="http://zh.wikipedia.org/wiki/%E4%BA%BA%E9%A1%9E%E5%9F%BA%E5%9B%A0%E7%B5%84">wiki人類基因組</a></p>
+
+<p>人類基因組含有約30億個DNA鹼基對，鹼基對是以氫鍵相結合的兩個含氮鹼基，以胸腺嘧啶（T）、腺嘌呤（A）、胞嘧啶（C）和鳥嘌呤（G）四種鹼基排列成鹼基序列。</p>
+
+<p>如果我們以一個位元組(<code>char</code>)來儲存一個人的基因組，大約需要多大的記憶體？</p>
+
+<p>提示: 1KB約表示1000位元組, 以此類推</p>
+
+<ol>
+<li>約 3KB</li>
+<li>約 3MB</li>
+<li><em>約 3GB</em></li>
+<li>約 3TB</li>
+</ol>
+
+  <button class="quiz-submit btn btn-primary">Submit</button>
+  <button class="quiz-toggle-hint btn btn-info">Show Hint</button>
+  <button class="quiz-show-answer btn btn-success">Show Answer</button>
+  <button class="quiz-clear btn btn-danger">Clear</button>
+  
+  </div>
+  </article>
+  <!-- Presenter Notes -->
+  <aside class="note" id="">
+    <section>
+      <p>30億為\(3 \times 10^9\)</p>
+
+<p>\(3\) GB = \(3 \times 2^10\) MB = \(3 \times 2^20\) KB = \(3 \times 2^30\) 位元組</p>
+
+    </section>
+  </aside>
+</slide>
+
+<slide class="large" id="slide-5">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  
+</hgroup>
+<article class = 'flexbox vcenter'>
+<p>面對大量資料</p>
+
+<p>可估計需要的記憶體</p>
+
+</article>
+<!-- Presenter Notes -->
+</slide>
+<slide class="large" id="slide-6">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  <h2>指針, 記憶體的住址</h2>
+</hgroup>
+<div style='float:left;width:48%;' class='flexbox vcenter'>
+  <pre><code class="cpp">#include &lt;Rcpp.h&gt;
+using namespace Rcpp;
+//[[Rcpp::export]]
+void showAddress(SEXP a) {
+  Rprintf(&quot;%p\n&quot;, a);
+}
+</code></pre>
+
+</div>
+<div style='float:right;width:48%;' class='flexbox vcenter'>
+  <pre><code class="r">showAddress(iris)
+</code></pre>
+
+<pre><code>## 0x7fe84c8e44d8
+</code></pre>
+
+</div>
+  <!-- Presenter Notes -->
+</slide>
+<slide class="" id="slide-7">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  <h2>32位元與64位元</h2>
+</hgroup>
+<article class = 'flexbox vcenter'>
+<pre><code class="r">showAddress(iris)
+</code></pre>
+
+<pre><code>## 0x7fe84c8e44d8
+</code></pre>
+
+<p>HexCode: 0 ~ F, 兩個字母表示一個位元組</p>
+
+<p>所以可以用$2<sup>6</sup> = 64$個bit表示記憶體的住址。</p>
+
+<p>32位元的電腦僅用$2<sup>5</sup> = 32$個bit表示記憶體的住址，</p>
+
+<p>$2<sup>32個$個位元組約為4GB</sup></p>
+
+</article>
+<!-- Presenter Notes -->
+</slide>
+<slide class="" id="slide-8" style="background:; background-repeat:no-repeat; background-position:center; ">
+  <img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+  <hgroup>
+    <h2>小挑戰</h2>
+  </hgroup>
+  <article data-timings="">
+    
+<div class="quiz quiz-single well ">
+  <p>64位元的電腦，記憶體大概為多少?</p>
+
+<ol>
+<li>小於TB(\(2^{40}\) 位元組)</li>
+<li>小於PB(\(2^{50}\) 位元組)</li>
+<li>小於EB(\(2^{60}\) 位元組)</li>
+<li><em>小於ZB(\(2^{70}\) 位元組)</em></li>
+</ol>
+
+  <button class="quiz-submit btn btn-primary">Submit</button>
+  <button class="quiz-toggle-hint btn btn-info">Show Hint</button>
+  <button class="quiz-show-answer btn btn-success">Show Answer</button>
+  <button class="quiz-clear btn btn-danger">Clear</button>
+  
+  </div>
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="large" id="slide-9">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  
+</hgroup>
+<article class = 'flexbox vcenter'>
+<p>取住址的運算子: <code>&amp;</code></p>
+
+<p>取值的運算子: <code>*</code></p>
+
+<pre><code class="cpp">#include &lt;Rcpp.h&gt;
+using namespace Rcpp;
+//[[Rcpp::export]]
+int getInt() {
+  int a = 1;
+  int* pa = &amp;a; // pa 是 a 的住址
+  return (*pa); // 把住在pa的人拿出來
+}
+</code></pre>
+
+</article>
+<!-- Presenter Notes -->
+<aside class="note">
+  <section>
+    <p>[1] 1</p>
+
+  </section>
+</aside>
+</slide>
+<slide class="" id="slide-10">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  <h2>字串的本質: char*, char[]</h2>
+</hgroup>
+<div style='float:left;width:48%;' class='flexbox vcenter'>
+  <pre><code class="cpp">#include &lt;Rcpp.h&gt;
+using namespace Rcpp;
+//[[Rcpp::export]]
+void getChar(CharacterVector src) {
+  const char* ps = CHAR(src[0]);
+  char tmp;
+  for(int i = 0;i &lt; 7;i++) {
+    tmp = ps[i];
+    Rcout &lt;&lt; tmp &lt;&lt; std::endl;
+  }
+}
+/*** R
+getChar(&quot;setosa&quot;)
+*/
+</code></pre>
+
+</div>
+<div style='float:right;width:48%;' class='flexbox vcenter'>
+  <p><code>{&#39;s&#39;, &#39;e&#39;, &#39;t&#39;, &#39;o&#39;, &#39;s&#39;, &#39;a&#39;, 0x00}</code></p>
+
+<p>陣列住標運算子:<code>[</code></p>
+
+<pre><code>## s
+## e
+## t
+## o
+## s
+## a
+</code></pre>
+
+</div>
+  <!-- Presenter Notes -->
+</slide>
+<slide class="" id="slide-11">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  
+</hgroup>
+<div style='float:left;width:48%;' class='flexbox vcenter'>
+  
+</div>
+<div style='float:right;width:48%;' class='flexbox vcenter'>
+  
+</div>
+  <!-- Presenter Notes -->
+</slide>
+<slide class="" id="slide-12">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  <h2>字串的本質: char*, char[]</h2>
+</hgroup>
+<div style='float:left;width:48%;' class='flexbox vcenter'>
+  <pre><code class="cpp">#include &lt;Rcpp.h&gt;
+using namespace Rcpp;
+//[[Rcpp::export]]
+void changeChar(CharacterVector src) {
+  char* ps = const_cast&lt;char*&gt;(CHAR(src[0]));
+  ps[0] = &#39;z&#39;;
+}
+/*** R
+changeChar(a &lt;- &quot;setosa&quot;)
+a
+*/
+</code></pre>
+
+</div>
+<div style='float:right;width:48%;' class='flexbox vcenter'>
+  <pre><code>## [1] &quot;zetosa&quot;
+</code></pre>
+
+<p><code>{&#39;s&#39;, &#39;e&#39;, &#39;t&#39;, &#39;o&#39;, &#39;s&#39;, &#39;a&#39;, 0x00}</code> \(\Rightarrow\) <code>{&#39;z&#39;, &#39;e&#39;, &#39;t&#39;, &#39;o&#39;, &#39;s&#39;, &#39;a&#39;, 0x00}</code></p>
+
+</div>
+  <!-- Presenter Notes -->
+</slide>
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='原子形態'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title=''>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='查詢物件的記憶體大小'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='小挑戰'>
+         4
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=5 title=''>
+         5
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=6 title='指針, 記憶體的住址'>
+         6
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=7 title='32位元與64位元'>
+         7
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=8 title='小挑戰'>
+         8
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=9 title=''>
+         9
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=10 title='字串的本質: char*, char[]'>
+         10
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=11 title=''>
+         11
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=12 title='字串的本質: char*, char[]'>
+         12
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  <script src="libraries/widgets/quiz/js/jquery.quiz.js"></script>
+<script src="libraries/widgets/quiz/js/mustache.min.js"></script>
+<script src="libraries/widgets/quiz/js/quiz-app.js"></script>
+
+  <!-- MathJax: Fall back to local if CDN offline but local image fonts are not supported (saves >100MB) -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        processEscapes: true
+      }
+    });
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <!-- <script src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script> -->
+  <script>window.MathJax || document.write('<script type="text/x-mathjax-config">MathJax.Hub.Config({"HTML-CSS":{imageFont:null}});<\/script><script src="libraries/widgets/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>')
+</script>
+<!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
