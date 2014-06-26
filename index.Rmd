@@ -13,7 +13,7 @@ knit        : slidify::knit2slides
 
 ```{r steup, include=FALSE, cache=FALSE}
 library(knitr)
-opts_chunk$set(echo = FALSE, results='asis')
+opts_chunk$set(echo = FALSE, results='asis', cache=FALSE)
 opts_chunk$get("echo")
 ```
 
@@ -222,3 +222,144 @@ a
 ```
 
 `{'s', 'e', 't', 'o', 's', 'a', 0x00}` $\Rightarrow$ `{'z', 'e', 't', 'o', 's', 'a', 0x00}`
+
+--- &vcenter .large
+
+運用指標就可以避免記憶體的拷貝
+
+--- &vcenter .large
+
+指標的形態非常重要
+
+--- &twocolvcenter
+
+*** =left
+
+```{r pointer5, engine='Rcpp', cache=FALSE, echo=TRUE}
+#include <Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+int changePtr() {
+  char* ps = "setosa";
+  int* pi = (int*) ps;
+  return *pi;
+}
+/*** R
+changePtr()
+*/
+```
+
+*** =right
+
+```{r pointer5R, dependson="pointer5", results='markup'}
+changePtr()
+```
+
+- s: 0x73
+- e: 0x65
+- t: 0x74
+- o: 0x6f
+
+0x7365746f
+
+0x6f746573
+
+--- &vcenter
+
+## 為什麼bool的轉形會變成0 or 1?
+
+```{r bool2charR, echo=TRUE, results='markup'}
+as.character(TRUE)
+```
+
+```{r bool2char, engine='Rcpp', echo=TRUE}
+#include<Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+void bool2char() {
+  bool b = true;
+  Rprintf("%hhX", (char) true);
+}
+/*** R
+bool2char()
+*/
+```
+
+```{r bool2charRR, dependson='bool2char', results='markup'}
+bool2char()
+```
+
+--- &twocolvcenter
+
+## R 的字串結尾一定是 0x00
+
+*** =left
+
+```{r strinput, echo=TRUE, results='markup'}
+a <- c("a", "setosa", 
+       "我是中文", "xxas;")
+nchar(a, type="bytes")
+```
+
+```{r showtail, echo=TRUE, engine='Rcpp'}
+#include<Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+void showTail(CharacterVector src, IntegerVector len) {
+  for(int i = 0;i < src.size();i++) {
+    const char* ps = CHAR(src[i]);
+    Rprintf("%hhX\n", ps[len[i]]);
+  }
+}
+/*** R
+showTail(a, nchar(a, type="bytes"))
+*/
+```
+
+*** =right
+
+```{r showtailR, results='markup'}
+showTail(a, nchar(a, type="bytes"))
+```
+
+--- &vcenter .large
+
+C++ 處理字串有很方便的物件:
+
+`std::string`
+
+--- &vcenter .large
+
+`std::string`是一個C++ 類別(class)
+
+類別有:
+
+- 建構子(constructor)
+- 解構子(destructor)
+- 成員函數(member function)
+- 資料成員(data member)
+
+--- &twocol
+
+## [建構子](http://www.cplusplus.com/reference/string/string/string/)
+
+```{r stringConstructor, engine='Rcpp', eval=FALSE}
+#include <string>
+#include <Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+SEXP constuct1() {
+  std::string a();
+  return wrap(a);
+}
+/*** R
+construct1()
+*/
+```
+
+--- &vcenter .large
+
+今天沒講到的有:
+
+- const
+- const char*

@@ -60,9 +60,9 @@
   
 </hgroup>
 <article class = 'flexbox vcenter'>
-<!-- html table generated in R 3.1.0 by xtable 1.7-3 package -->
+<!-- html table generated in R 3.0.3 by xtable 1.7-3 package -->
 
-<!-- Thu Jun 26 20:17:32 2014 -->
+<!-- Thu Jun 26 21:23:36 2014 -->
 
 <TABLE border=1>
 <TR> <TH>  </TH> <TH> C原子形態 </TH> <TH> 意義 </TH> <TH> 對應的R原子形態 </TH> <TH> 大小.位元組. </TH>  </TR>
@@ -192,7 +192,7 @@ void showAddress(SEXP a) {
   <pre><code class="r">showAddress(iris)
 </code></pre>
 
-<pre><code>## 0x7fe84c8e44d8
+<pre><code>## 0x384cd98
 </code></pre>
 
 </div>
@@ -207,7 +207,7 @@ void showAddress(SEXP a) {
 <pre><code class="r">showAddress(iris)
 </code></pre>
 
-<pre><code>## 0x7fe84c8e44d8
+<pre><code>## 0x384cd98
 </code></pre>
 
 <p>HexCode: 0 ~ F, 兩個字母表示一個位元組</p>
@@ -319,19 +319,6 @@ getChar(&quot;setosa&quot;)
 <slide class="" id="slide-11">
 <img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
 <hgroup>
-  
-</hgroup>
-<div style='float:left;width:48%;' class='flexbox vcenter'>
-  
-</div>
-<div style='float:right;width:48%;' class='flexbox vcenter'>
-  
-</div>
-  <!-- Presenter Notes -->
-</slide>
-<slide class="" id="slide-12">
-<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
-<hgroup>
   <h2>字串的本質: char*, char[]</h2>
 </hgroup>
 <div style='float:left;width:48%;' class='flexbox vcenter'>
@@ -339,11 +326,14 @@ getChar(&quot;setosa&quot;)
 using namespace Rcpp;
 //[[Rcpp::export]]
 void changeChar(CharacterVector src) {
-  char* ps = const_cast&lt;char*&gt;(CHAR(src[0]));
+  char* ps =
+    const_cast&lt;char*&gt;(CHAR(src[0]));
   ps[0] = &#39;z&#39;;
 }
 /*** R
-changeChar(a &lt;- &quot;setosa&quot;)
+a &lt;- &quot;setosa&quot;
+tracemem(a)
+changeChar(a)
 a
 */
 </code></pre>
@@ -357,6 +347,200 @@ a
 
 </div>
   <!-- Presenter Notes -->
+</slide>
+<slide class="large" id="slide-12">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  
+</hgroup>
+<article class = 'flexbox vcenter'>
+<p>運用指標就可以避免記憶體的拷貝</p>
+
+</article>
+<!-- Presenter Notes -->
+</slide>
+<slide class="large" id="slide-13">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  
+</hgroup>
+<article class = 'flexbox vcenter'>
+<p>指標的形態非常重要</p>
+
+</article>
+<!-- Presenter Notes -->
+</slide>
+<slide class="" id="slide-14">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  
+</hgroup>
+<div style='float:left;width:48%;' class='flexbox vcenter'>
+  <pre><code class="cpp">#include &lt;Rcpp.h&gt;
+using namespace Rcpp;
+//[[Rcpp::export]]
+int changePtr() {
+  char* ps = &quot;setosa&quot;;
+  int* pi = (int*) ps;
+  return *pi;
+}
+/*** R
+changePtr()
+*/
+</code></pre>
+
+</div>
+<div style='float:right;width:48%;' class='flexbox vcenter'>
+  <pre><code>## [1] 1869899123
+</code></pre>
+
+<ul>
+<li>s: 0x73</li>
+<li>e: 0x65</li>
+<li>t: 0x74</li>
+<li>o: 0x6f</li>
+</ul>
+
+<p>0x7365746f</p>
+
+<p>0x6f746573</p>
+
+</div>
+  <!-- Presenter Notes -->
+</slide>
+<slide class="" id="slide-15">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  <h2>為什麼bool的轉形會變成0 or 1?</h2>
+</hgroup>
+<article class = 'flexbox vcenter'>
+<pre><code class="r">as.character(TRUE)
+</code></pre>
+
+<pre><code>## [1] &quot;TRUE&quot;
+</code></pre>
+
+<pre><code class="cpp">#include&lt;Rcpp.h&gt;
+using namespace Rcpp;
+//[[Rcpp::export]]
+void bool2char() {
+  bool b = true;
+  Rprintf(&quot;%hhX&quot;, (char) true);
+}
+/*** R
+bool2char()
+*/
+</code></pre>
+
+<pre><code>## 1
+</code></pre>
+
+</article>
+<!-- Presenter Notes -->
+</slide>
+<slide class="" id="slide-16">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  <h2>R 的字串結尾一定是 0x00</h2>
+</hgroup>
+<div style='float:left;width:48%;' class='flexbox vcenter'>
+  <pre><code class="r">a &lt;- c(&quot;a&quot;, &quot;setosa&quot;, &quot;我是中文&quot;, &quot;xxas;&quot;)
+nchar(a, type = &quot;bytes&quot;)
+</code></pre>
+
+<pre><code>## [1]  1  6 12  5
+</code></pre>
+
+<pre><code class="cpp">#include&lt;Rcpp.h&gt;
+using namespace Rcpp;
+//[[Rcpp::export]]
+void showTail(CharacterVector src, IntegerVector len) {
+  for(int i = 0;i &lt; src.size();i++) {
+    const char* ps = CHAR(src[i]);
+    Rprintf(&quot;%hhX\n&quot;, ps[len[i]]);
+  }
+}
+/*** R
+showTail(a, nchar(a, type=&quot;bytes&quot;))
+*/
+</code></pre>
+
+</div>
+<div style='float:right;width:48%;' class='flexbox vcenter'>
+  <pre><code>## 0
+## 0
+## 0
+## 0
+</code></pre>
+
+</div>
+  <!-- Presenter Notes -->
+</slide>
+<slide class="large" id="slide-17">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  
+</hgroup>
+<article class = 'flexbox vcenter'>
+<p>C++ 處理字串有很方便的物件:</p>
+
+<p><code>std::string</code></p>
+
+</article>
+<!-- Presenter Notes -->
+</slide>
+<slide class="large" id="slide-18">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  
+</hgroup>
+<article class = 'flexbox vcenter'>
+<p><code>std::string</code>是一個C++ 類別(class)</p>
+
+<p>類別有:</p>
+
+<ul>
+<li>建構子(constructor)</li>
+<li>解構子(destructor)</li>
+<li>成員函數(member function)</li>
+<li>資料成員(data member)</li>
+</ul>
+
+</article>
+<!-- Presenter Notes -->
+</slide>
+<slide class="" id="slide-19" style="background:; background-repeat:no-repeat; background-position:center; ">
+  <img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+  <hgroup>
+    <h2><a href="http://www.cplusplus.com/reference/string/string/string/">建構子</a></h2>
+  </hgroup>
+  <article data-timings="">
+    
+<div style='float:left;width:48%;'>
+
+</div>
+  <div style='float:right;width:48%;'>
+
+</div>
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="large" id="slide-20">
+<img src="assets/img/Taiwan-R-logo.png" class="logo fit100" />
+<hgroup>
+  
+</hgroup>
+<article class = 'flexbox vcenter'>
+<p>今天沒講到的有:</p>
+
+<ul>
+<li>const</li>
+<li>const char*</li>
+</ul>
+
+</article>
+<!-- Presenter Notes -->
 </slide>
     <slide class="backdrop"></slide>
   </slides>
@@ -424,14 +608,62 @@ a
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=11 title=''>
+        data-slide=11 title='字串的本質: char*, char[]'>
          11
       </a>
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=12 title='字串的本質: char*, char[]'>
+        data-slide=12 title=''>
          12
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=13 title=''>
+         13
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=14 title=''>
+         14
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=15 title='為什麼bool的轉形會變成0 or 1?'>
+         15
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=16 title='R 的字串結尾一定是 0x00'>
+         16
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=17 title=''>
+         17
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=18 title=''>
+         18
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=19 title='<a href="http://www.cplusplus.com/reference/string/string/string/">建構子</a>'>
+         19
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=20 title=''>
+         20
       </a>
     </li>
   </ul>

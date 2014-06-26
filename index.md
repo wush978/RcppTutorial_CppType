@@ -13,12 +13,13 @@ knit        : slidify::knit2slides
 
 
 
+
 ## 原子形態
 
 --- &vcenter .large
 
-<!-- html table generated in R 3.1.0 by xtable 1.7-3 package -->
-<!-- Thu Jun 26 20:18:57 2014 -->
+<!-- html table generated in R 3.0.3 by xtable 1.7-3 package -->
+<!-- Thu Jun 26 21:23:36 2014 -->
 <TABLE border=1>
 <TR> <TH>  </TH> <TH> C原子形態 </TH> <TH> 意義 </TH> <TH> 對應的R原子形態 </TH> <TH> 大小.位元組. </TH>  </TR>
   <TR> <TD align="right"> 1 </TD> <TD> bool </TD> <TD> 布林 </TD> <TD> logical(註) </TD> <TD align="right">  </TD> </TR>
@@ -29,6 +30,7 @@ knit        : slidify::knit2slides
   <TR> <TD align="right"> 6 </TD> <TD> float </TD> <TD> 浮點數 </TD> <TD>  </TD> <TD align="right">   4 </TD> </TR>
   <TR> <TD align="right"> 7 </TD> <TD> double </TD> <TD> 雙精確服點數 </TD> <TD> double </TD> <TD align="right">   8 </TD> </TR>
    </TABLE>
+
 
 --- &twocol
 
@@ -54,6 +56,7 @@ void showSize() {
 }
 ```
 
+
 *** =right
 
 <br/><br/><br/>
@@ -67,6 +70,7 @@ void showSize() {
 ## 4
 ## 8
 ```
+
 
 --- &radio
 
@@ -113,6 +117,7 @@ void showAddress(SEXP a) {
 }
 ```
 
+
 *** =right
 
 
@@ -121,8 +126,9 @@ showAddress(iris)
 ```
 
 ```
-## 0x7fbdbbb59f40
+## 0x384cd98
 ```
+
 
 --- &vcenter 
 
@@ -134,8 +140,9 @@ showAddress(iris)
 ```
 
 ```
-## 0x7fbdbbb59f40
+## 0x384cd98
 ```
+
 
 HexCode: 0 ~ F, 兩個字母表示一個位元組
 
@@ -174,9 +181,11 @@ int getInt() {
 }
 ```
 
+
 *** =pnotes
 
 [1] 1
+
 
 --- &twocolvcenter 
 
@@ -202,6 +211,7 @@ getChar("setosa")
 */
 ```
 
+
 *** =right
 
 `{'s', 'e', 't', 'o', 's', 'a', 0x00}`
@@ -218,6 +228,7 @@ getChar("setosa")
 ## a
 ```
 
+
 --- &twocolvcenter 
 
 ## 字串的本質: char*, char[]
@@ -225,6 +236,186 @@ getChar("setosa")
 *** =left
 
 
+```cpp
+#include <Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+void changeChar(CharacterVector src) {
+  char* ps =
+    const_cast<char*>(CHAR(src[0]));
+  ps[0] = 'z';
+}
+/*** R
+a <- "setosa"
+tracemem(a)
+changeChar(a)
+a
+*/
+```
+
+
+*** =right
+
+
+```
+## [1] "zetosa"
+```
+
+
+`{'s', 'e', 't', 'o', 's', 'a', 0x00}` $\Rightarrow$ `{'z', 'e', 't', 'o', 's', 'a', 0x00}`
+
+--- &vcenter .large
+
+運用指標就可以避免記憶體的拷貝
+
+--- &vcenter .large
+
+指標的形態非常重要
+
+--- &twocolvcenter
+
+*** =left
+
+
+```cpp
+#include <Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+int changePtr() {
+  char* ps = "setosa";
+  int* pi = (int*) ps;
+  return *pi;
+}
+/*** R
+changePtr()
+*/
+```
+
+
+*** =right
+
+
+```
+## [1] 1869899123
+```
+
+
+- s: 0x73
+- e: 0x65
+- t: 0x74
+- o: 0x6f
+
+0x7365746f
+
+0x6f746573
+
+--- &vcenter
+
+## 為什麼bool的轉形會變成0 or 1?
+
+
+```r
+as.character(TRUE)
+```
+
+```
+## [1] "TRUE"
+```
 
 
 
+```cpp
+#include<Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+void bool2char() {
+  bool b = true;
+  Rprintf("%hhX", (char) true);
+}
+/*** R
+bool2char()
+*/
+```
+
+
+
+```
+## 1
+```
+
+
+--- &twocolvcenter
+
+## R 的字串結尾一定是 0x00
+
+*** =left
+
+
+```r
+a <- c("a", "setosa", "我是中文", "xxas;")
+nchar(a, type = "bytes")
+```
+
+```
+## [1]  1  6 12  5
+```
+
+
+
+```cpp
+#include<Rcpp.h>
+using namespace Rcpp;
+//[[Rcpp::export]]
+void showTail(CharacterVector src, IntegerVector len) {
+  for(int i = 0;i < src.size();i++) {
+    const char* ps = CHAR(src[i]);
+    Rprintf("%hhX\n", ps[len[i]]);
+  }
+}
+/*** R
+showTail(a, nchar(a, type="bytes"))
+*/
+```
+
+
+*** =right
+
+
+```
+## 0
+## 0
+## 0
+## 0
+```
+
+
+--- &vcenter .large
+
+C++ 處理字串有很方便的物件:
+
+`std::string`
+
+--- &vcenter .large
+
+`std::string`是一個C++ 類別(class)
+
+類別有:
+
+- 建構子(constructor)
+- 解構子(destructor)
+- 成員函數(member function)
+- 資料成員(data member)
+
+--- &twocol
+
+## [建構子](http://www.cplusplus.com/reference/string/string/string/)
+
+
+
+
+--- &vcenter .large
+
+今天沒講到的有:
+
+- const
+- const char*
